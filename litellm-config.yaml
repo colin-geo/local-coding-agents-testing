@@ -1,0 +1,45 @@
+model_list:
+  # Map Claude model names to the local llama-server OpenAI endpoint.
+  # llama-server ignores the model field — it always serves the loaded GGUF.
+  - model_name: "claude-opus-4-7"
+    litellm_params:
+      model: "openai/local-model"
+      api_base: "http://llama-server:8080/v1"
+      api_key: "local"
+
+  - model_name: "claude-sonnet-4-6"
+    litellm_params:
+      model: "openai/local-model"
+      api_base: "http://llama-server:8080/v1"
+      api_key: "local"
+
+  - model_name: "claude-haiku-4-5"
+    litellm_params:
+      model: "openai/local-model"
+      api_base: "http://llama-server:8080/v1"
+      api_key: "local"
+
+  # Wildcard fallback for any other claude model name
+  - model_name: "claude-*"
+    litellm_params:
+      model: "openai/local-model"
+      api_base: "http://llama-server:8080/v1"
+      api_key: "local"
+
+  # Direct alias for testing via curl / OpenAI SDK
+  - model_name: "local-model"
+    litellm_params:
+      model: "openai/local-model"
+      api_base: "http://llama-server:8080/v1"
+      api_key: "local"
+
+litellm_settings:
+  # Drop Anthropic-specific params (thinking, betas) that OpenAI doesn't accept
+  drop_params: true
+  request_timeout: 600
+
+general_settings:
+  # master_key enables the /v1/messages Anthropic-compatible endpoint
+  master_key: "local"
+  # Uncomment if /v1/messages returns 404 on your LiteLLM version:
+  # enable_anthropic_pass_through: true

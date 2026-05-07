@@ -1,0 +1,19 @@
+# Model files — too large for git
+models/
+
+# LiteLLM runtime state
+*.db
+litellm_proxy_config*.db
+
+# Environment overrides
+.env
+
+# Docker compose local overrides
+docker-compose.override.yml
+
+# Logs
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
