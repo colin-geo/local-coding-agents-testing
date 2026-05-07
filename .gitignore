@@ -1,6 +1,10 @@
 # Model files — too large for git
 models/
 
+# Default agent workspace — contents are user projects, not part of this repo
+workspace/*
+!workspace/.gitkeep
+
 # LiteLLM runtime state
 *.db
 litellm_proxy_config*.db

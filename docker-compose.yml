@@ -50,3 +50,45 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+
+  claude-code:
+    build:
+      context: .
+      dockerfile: Dockerfile.agents
+      args:
+        PACKAGE: "@anthropic-ai/claude-code"
+    container_name: claude-code
+    profiles: ["agents"]
+    stdin_open: true
+    tty: true
+    command: claude
+    working_dir: /workspace
+    environment:
+      - ANTHROPIC_BASE_URL=http://litellm:4000
+      - ANTHROPIC_API_KEY=local
+    volumes:
+      - ${WORKSPACE:-./workspace}:/workspace
+    depends_on:
+      litellm:
+        condition: service_healthy
+
+  codex:
+    build:
+      context: .
+      dockerfile: Dockerfile.agents
+      args:
+        PACKAGE: "@openai/codex"
+    container_name: codex
+    profiles: ["agents"]
+    stdin_open: true
+    tty: true
+    command: codex
+    working_dir: /workspace
+    environment:
+      - OPENAI_BASE_URL=http://llama-server:8080/v1
+      - OPENAI_API_KEY=local
+    volumes:
+      - ${WORKSPACE:-./workspace}:/workspace
+    depends_on:
+      llama-server:
+        condition: service_healthy

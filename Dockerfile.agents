@@ -1,0 +1,15 @@
+FROM node:lts-slim
+
+ARG PACKAGE
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g ${PACKAGE}
+
+# Default git identity for commits made inside the container
+RUN git config --global user.email "agent@local" \
+    && git config --global user.name "Local Agent"
+
+WORKDIR /workspace
