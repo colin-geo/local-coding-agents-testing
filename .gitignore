@@ -21,3 +21,4 @@ docker-compose.override.yml
 # Python cache
 __pycache__/
 *.pyc
+.aider*

@@ -80,10 +80,10 @@ function Save-LLMModel {
         [switch]$Force
     )
 
-    $script  = Join-Path $script:RepoRoot "scripts\Download-Model.ps1"
-    $cmdArgs = @("-Model", $Model)
-    if ($Force) { $cmdArgs += "-Force" }
-    & $script @cmdArgs
+    $scriptPath = Join-Path $script:RepoRoot "scripts\Download-Model.ps1"
+    $scriptArgs = @{ Model = $Model }
+    if ($Force) { $scriptArgs.Force = $true }
+    & $scriptPath @scriptArgs
 }
 
 # ---------------------------------------------------------------------------
@@ -102,16 +102,20 @@ function Start-LLMServer {
         [Parameter(Mandatory, Position = 0)]
         [string]$Model,
 
+        [Alias("Profile")]
         [ValidateSet("fast", "quality")]
-        [string]$Profile,
+        [string]$StartupProfile,
 
         [bool]$Detach = $true
     )
 
-    $script  = Join-Path $script:RepoRoot "scripts\Start-Server.ps1"
-    $cmdArgs = @("-Model", $Model, "-Detach", $Detach)
-    if ($PSBoundParameters.ContainsKey("Profile")) { $cmdArgs += "-Profile", $Profile }
-    & $script @cmdArgs
+    $scriptPath = Join-Path $script:RepoRoot "scripts\Start-Server.ps1"
+    $scriptArgs = @{
+        Model  = $Model
+        Detach = $Detach
+    }
+    if ($PSBoundParameters.ContainsKey("StartupProfile")) { $scriptArgs.Profile = $StartupProfile }
+    & $scriptPath @scriptArgs
 }
 
 # ---------------------------------------------------------------------------
@@ -129,10 +133,10 @@ function Stop-LLMServer {
         [switch]$Volumes
     )
 
-    $script  = Join-Path $script:RepoRoot "scripts\Stop-Server.ps1"
-    $cmdArgs = @()
-    if ($Volumes) { $cmdArgs += "-Volumes" }
-    & $script @cmdArgs
+    $scriptPath = Join-Path $script:RepoRoot "scripts\Stop-Server.ps1"
+    $scriptArgs = @{}
+    if ($Volumes) { $scriptArgs.Volumes = $true }
+    & $scriptPath @scriptArgs
 }
 
 # ---------------------------------------------------------------------------
@@ -211,10 +215,13 @@ function Start-LLMAgent {
         [switch]$Build
     )
 
-    $script  = Join-Path $script:RepoRoot "scripts\Run-Agent.ps1"
-    $cmdArgs = @("-Agent", $Agent, "-Workspace", $Workspace)
-    if ($Build) { $cmdArgs += "-Build" }
-    & $script @cmdArgs
+    $scriptPath = Join-Path $script:RepoRoot "scripts\Run-Agent.ps1"
+    $scriptArgs = @{
+        Agent     = $Agent
+        Workspace = $Workspace
+    }
+    if ($Build) { $scriptArgs.Build = $true }
+    & $scriptPath @scriptArgs
 }
 
 # ---------------------------------------------------------------------------
