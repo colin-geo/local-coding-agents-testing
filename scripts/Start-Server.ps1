@@ -79,12 +79,12 @@ $env:CACHE_TYPE_K  = $entry.cache_type_k
 $env:CACHE_TYPE_V  = $entry.cache_type_v
 $env:MODEL_ALIAS   = $Model
 
-# Only set N_NUM_MOE when the registry entry specifies it (MoE models only)
-if ($null -ne $entry.n_num_moe) {
-    $env:N_NUM_MOE = [string]$entry.n_num_moe
+# Only set N_CPU_MOE when the registry entry specifies it (MoE models only)
+if ($null -ne $entry.n_cpu_moe) {
+    $env:N_CPU_MOE = [string]$entry.n_cpu_moe
 } else {
     # Clear any value from a previous run so the compose var expands to empty
-    Remove-Item -Path "env:N_NUM_MOE" -ErrorAction SilentlyContinue
+    Remove-Item -Path "env:N_CPU_MOE" -ErrorAction SilentlyContinue
 }
 
 Write-Host ""
@@ -92,8 +92,8 @@ Write-Host "Starting local LLM server" -ForegroundColor Cyan
 Write-Host "  Model:        $($entry.display_name)"
 Write-Host "  Profile:      $Profile"
 Write-Host "  GPU layers:   $($entry.n_gpu_layers)"
-if ($null -ne $entry.n_num_moe) {
-    Write-Host "  MoE GPU:      $($entry.n_num_moe) layers"
+if ($null -ne $entry.n_cpu_moe) {
+    Write-Host "  MoE CPU:      $($entry.n_cpu_moe) expert layers on CPU"
 }
 Write-Host "  Context:      $ctxSize tokens"
 Write-Host "  Parallel:     $parallel slot(s)"

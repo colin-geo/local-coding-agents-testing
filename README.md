@@ -82,6 +82,9 @@ Models are stored in `./models/` (gitignored). The registry at `config/models.js
 
 # ~19.5 GB — partial GPU offload, requires 32+ GB system RAM
 .\scripts\Download-Model.ps1 -Model qwen2.5-coder-32b
+
+# ~21.4 GB — MoE model (35B total / 3B active); expert layers run on CPU, requires 32+ GB system RAM
+.\scripts\Download-Model.ps1 -Model qwen3.6-35b-a3b
 ```
 
 Downloads resume automatically if interrupted.
@@ -146,7 +149,7 @@ Add an entry to `config/models.json`:
   "hf_file": "model-Q4_K_M.gguf",
   "hf_url": "https://huggingface.co/org/repo-GGUF/resolve/main/model-Q4_K_M.gguf",
   "n_gpu_layers": -1,
-  "n_num_moe": null,
+  "n_cpu_moe": null,
   "ctx_size": 32768,
   "cache_type_k": "f16",
   "cache_type_v": "f16",
@@ -154,7 +157,7 @@ Add an entry to `config/models.json`:
 }
 ```
 
-All scripts pick it up automatically. Set `n_num_moe` to an integer for MoE models (controls how many expert layers stay on GPU). Use `"cache_type_k": "q8_0"` to halve KV cache VRAM on large models or long contexts.
+All scripts pick it up automatically. Set `n_cpu_moe` to the total number of MoE layers for MoE models — this offloads all expert tensors to CPU RAM while keeping attention layers on GPU (maps to llama.cpp's `--n-cpu-moe`). Use `"cache_type_k": "q8_0"` to halve KV cache VRAM on large models or long contexts.
 
 ## Script reference
 
