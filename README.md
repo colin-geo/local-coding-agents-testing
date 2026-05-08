@@ -159,6 +159,43 @@ Add an entry to `config/models.json`:
 
 All scripts pick it up automatically. Set `n_cpu_moe` to the total number of MoE layers for MoE models — this offloads all expert tensors to CPU RAM while keeping attention layers on GPU (maps to llama.cpp's `--n-cpu-moe`). Use `"cache_type_k": "q8_0"` to halve KV cache VRAM on large models or long contexts.
 
+## PowerShell module
+
+`LocalCodingAgents.psm1` wraps all scripts into proper cmdlets. Import it once in your PowerShell profile and the commands are available in every session.
+
+### One-time setup
+
+```powershell
+# Open your profile in an editor
+notepad $PROFILE
+
+# Add this line (adjust path to match your clone location)
+Import-Module C:\Users\colin\Source\repos\local-coding-agents\LocalCodingAgents.psm1
+```
+
+### Available cmdlets
+
+| Cmdlet | Description |
+|--------|-------------|
+| `Get-LLMModel [-Model <key>]` | List registry models with download status; detail view for one model |
+| `Save-LLMModel <key> [-Force]` | Download a GGUF model from HuggingFace |
+| `Start-LLMServer <key> [-Profile fast\|quality] [-Detach <bool>]` | Start llama-server + LiteLLM |
+| `Stop-LLMServer [-Volumes]` | Stop the server stack |
+| `Get-LLMServerStatus` | Show whether containers are running |
+| `Set-LLMAgentEnv [-Agent claude\|codex\|all]` | Set env vars for host agents (no dot-source needed) |
+| `Start-LLMAgent <claude\|aider\|codex> [-Workspace <path>] [-Build]` | Run a coding agent container |
+
+### Typical session
+
+```powershell
+Get-LLMModel                                      # see what's available / downloaded
+Save-LLMModel qwen2.5-coder-7b                    # download if needed
+Start-LLMServer qwen2.5-coder-7b                  # start server stack
+Get-LLMServerStatus                               # confirm both containers running
+Start-LLMAgent claude -Workspace C:\repos\myapp   # launch agent
+Stop-LLMServer                                    # shut down when done
+```
+
 ## Script reference
 
 | Script | Description |
