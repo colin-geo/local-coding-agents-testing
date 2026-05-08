@@ -92,3 +92,22 @@ services:
     depends_on:
       llama-server:
         condition: service_healthy
+
+  aider:
+    build:
+      context: .
+      dockerfile: Dockerfile.aider
+    container_name: aider
+    profiles: ["agents"]
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    environment:
+      - OPENAI_API_KEY=local
+      - OPENAI_API_BASE=http://llama-server:8080/v1
+      - AIDER_MODEL=openai/local-model
+    volumes:
+      - ${WORKSPACE:-./workspace}:/workspace
+    depends_on:
+      llama-server:
+        condition: service_healthy

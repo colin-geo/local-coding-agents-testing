@@ -1,6 +1,6 @@
 # Local Coding Agents
 
-Run coding agents (Claude Code, OpenAI Codex) against local LLMs instead of cloud APIs. The entire stack runs in Docker: model inference via [llama.cpp](https://github.com/ggml-org/llama.cpp), an API translation proxy, and the agents themselves.
+Run coding agents (Claude Code, Aider) against local LLMs instead of cloud APIs. The entire stack runs in Docker: model inference via [llama.cpp](https://github.com/ggml-org/llama.cpp), an API translation proxy, and the agents themselves.
 
 ## Purpose
 
@@ -25,7 +25,7 @@ This repo lets you benchmark and experiment with local open-weight models as dro
 │  │                          │  :4000     │      │    │
 │  │                          └─────┬──────┘      │    │
 │  │  ┌─────────────┐               │ OpenAI API  │    │
-│  │  │    codex    │───────────────┤             │    │
+│  │  │    aider    │───────────────┤             │    │
 │  │  └─────────────┘               │             │    │
 │  │                          ┌─────▼──────┐      │    │
 │  │                          │llama-server│      │    │
@@ -45,9 +45,12 @@ This repo lets you benchmark and experiment with local open-weight models as dro
 | `llama-server` | `ghcr.io/ggml-org/llama.cpp:server-cuda` | Loads a GGUF model and serves an OpenAI-compatible API on `:8080` |
 | `litellm` | `ghcr.io/berriai/litellm:main-latest` | Translates Claude Code's Anthropic Messages API into OpenAI format and forwards to llama-server on `:4000` |
 | `claude-code` | Built from `Dockerfile.agents` | Claude Code CLI pre-configured to point at LiteLLM |
-| `codex` | Built from `Dockerfile.agents` | OpenAI Codex CLI pre-configured to point at llama-server directly |
+| `aider` | Built from `Dockerfile.aider` | [Aider](https://aider.chat/) coding agent using the OpenAI Chat Completions API directly against llama-server |
+| `codex` | Built from `Dockerfile.agents` | OpenAI Codex CLI (included but **does not support local endpoints** — see note below) |
 
-`llama-server` and `litellm` are always-on services (started with `Start-Server.ps1`). `claude-code` and `codex` are on-demand — each run spawns a fresh container, mounts your project directory, and removes itself on exit.
+`llama-server` and `litellm` are always-on services (started with `Start-Server.ps1`). Agent containers are on-demand — each run spawns a fresh container, mounts your project directory, and removes itself on exit.
+
+> **Note on Codex CLI:** The `@openai/codex` CLI (v0.129+) uses the OpenAI Responses API over WebSocket (`wss://api.openai.com/v1/responses`). This protocol is not implemented by llama-server or any local inference server, so Codex cannot be redirected to a local endpoint. The container is retained in case a future version adds support. Use **Aider** for local LLM coding sessions.
 
 ## Prerequisites
 
@@ -108,19 +111,19 @@ This starts `llama-server` and `litellm` as detached Docker services. The model 
 docker compose --profile agents build
 ```
 
-This pulls a Node.js base image and installs Claude Code and Codex CLI. Only needed once, or after updating agent versions.
+This builds three images: Claude Code and Codex (Node.js) from `Dockerfile.agents`, and Aider (Python) from `Dockerfile.aider`. Only needed once, or after updating agent versions.
 
 ### 5. Run an agent
 
 ```powershell
-# Mount the current directory as the workspace
-.\scripts\Run-Agent.ps1 -Agent claude
-
-# Mount a specific project
+# Claude Code — via LiteLLM proxy (Anthropic API → OpenAI)
 .\scripts\Run-Agent.ps1 -Agent claude -Workspace C:\path\to\your\project
 
-# Run Codex instead
-.\scripts\Run-Agent.ps1 -Agent codex -Workspace C:\path\to\your\project
+# Aider — directly against llama-server (OpenAI Chat Completions)
+.\scripts\Run-Agent.ps1 -Agent aider -Workspace C:\path\to\your\project
+
+# Defaults to ./workspace/ if -Workspace is omitted
+.\scripts\Run-Agent.ps1 -Agent aider
 ```
 
 The agent starts interactively inside Docker with your project mounted at `/workspace`. The server must be running first.
@@ -160,7 +163,7 @@ All scripts pick it up automatically. Set `n_num_moe` to an integer for MoE mode
 | `Download-Model.ps1 -Model <key>` | Download a GGUF model from HuggingFace |
 | `Start-Server.ps1 -Model <key> [-Profile fast\|quality]` | Start llama-server + LiteLLM |
 | `Stop-Server.ps1` | Stop the server stack |
-| `Run-Agent.ps1 -Agent claude\|codex [-Workspace <path>]` | Run a coding agent container |
+| `Run-Agent.ps1 -Agent claude\|aider\|codex [-Workspace <path>]` | Run a coding agent container |
 | `Set-AgentEnv.ps1 [-Agent claude\|codex\|all]` | Set env vars to use agents on the host instead of in Docker |
 
 ## Using agents on the host (alternative to Docker)

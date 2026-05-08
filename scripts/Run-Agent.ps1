@@ -19,7 +19,7 @@
 #>
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("claude", "codex")]
+    [ValidateSet("claude", "codex", "aider")]
     [string]$Agent,
 
     [string]$Workspace = (Get-Location).Path,
@@ -46,7 +46,11 @@ if (-not $serverUp) {
     exit 1
 }
 
-$service = if ($Agent -eq "claude") { "claude-code" } else { "codex" }
+$service = switch ($Agent) {
+    "claude" { "claude-code" }
+    "codex"  { "codex" }
+    "aider"  { "aider" }
+}
 $env:WORKSPACE = $Workspace
 
 Write-Host ""
